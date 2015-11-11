@@ -23,6 +23,8 @@ struct CartRequest: Request {
 
     func serializeToJSON() -> NSData {
         let dict = ["id": self.cartId]
+        
+        //should be ok to try! here, we are asserting that this class can create valid JSON
         return try! NSJSONSerialization.dataWithJSONObject(dict, options: [])
     }
 }
@@ -68,7 +70,6 @@ enum Result<A> {
 
 protocol Service{
     func performRequest<A: Response>(request: NSURLRequest, callback: Result<A> -> ())
-    func parseResult<A: Response>(data: NSData) throws -> A
 }
 
 extension Service{
