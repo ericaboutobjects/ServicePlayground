@@ -35,7 +35,11 @@ protocol Response {
 
 struct Cart{
     var cartId: String
-    var total: Double
+    var total = 0.0
+    
+    init(cartId: String){
+        self.cartId = cartId
+    }
     
     init(cartId: String, total: Double){
         self.cartId = cartId
@@ -105,16 +109,41 @@ extension Service{
     }
 }
 
-class CartService: Service{
+protocol ServiceRoute {
+    var path : String { get }
+    var baseURL: NSURL { get }
+}
 
-    func fetchCart(cartRequest: CartRequest, completion: Result<Cart> -> ()){
-        let url = NSURL(string: "http://com.me.domain/cart")
-        let request = NSMutableURLRequest(URL: url!)
+enum CartServiceEndpoint {
+    case Cart(String)
+}
+
+extension CartServiceEndpoint : ServiceRoute {
+    
+    var baseURL: NSURL { return NSURL(string: "https://com.me.domain")! }
+
+    var path: String {
+        switch self {
+        case .Cart(let cartId):
+            return "/cart/\(cartId)"
+        }
+    }
+}
+
+
+func url(route: ServiceRoute) -> NSURL {
+    return route.baseURL.URLByAppendingPathComponent(route.path)
+}
+
+class CartService: Service{
+    
+    func fetchCart(cartId: String, completion: Result<Cart> -> ()){
+        
+        let request = NSMutableURLRequest(URL: url(CartServiceEndpoint.Cart(cartId)))
         request.HTTPMethod = "GET"
         request.addValue("text/json", forHTTPHeaderField: "Content-Type")
         request.addValue("text/json", forHTTPHeaderField: "Accept")
         request.HTTPShouldHandleCookies = true
-        request.HTTPBody = cartRequest.serializeToJSON()
 
         performRequest(request) { (result: Result<Cart>) -> () in
             switch result {
@@ -174,7 +203,7 @@ NSURLProtocol.registerClass(PlaygroundURLProtocol)
 
 let cartService = CartService()
 
-cartService.fetchCart(CartRequest(cartId: "23232")) { (result) -> () in
+cartService.fetchCart("reresd345346434") { (result) -> () in
     switch result {
     case let .Value(cart):
         print("Cart : \(cart)")
