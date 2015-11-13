@@ -114,6 +114,12 @@ protocol ServiceRoute {
     var baseURL: NSURL { get }
 }
 
+extension ServiceRoute{
+    func url() -> NSURL {
+        return self.baseURL.URLByAppendingPathComponent(self.path)
+    }
+}
+
 enum CartServiceEndpoint {
     case Cart(String)
 }
@@ -131,15 +137,13 @@ extension CartServiceEndpoint : ServiceRoute {
 }
 
 
-func url(route: ServiceRoute) -> NSURL {
-    return route.baseURL.URLByAppendingPathComponent(route.path)
-}
+
 
 class CartService: Service{
     
     func fetchCart(cartId: String, completion: Result<Cart> -> ()){
         
-        let request = NSMutableURLRequest(URL: url(CartServiceEndpoint.Cart(cartId)))
+        let request = NSMutableURLRequest(URL: CartServiceEndpoint.Cart(cartId).url())
         request.HTTPMethod = "GET"
         request.addValue("text/json", forHTTPHeaderField: "Content-Type")
         request.addValue("text/json", forHTTPHeaderField: "Accept")
