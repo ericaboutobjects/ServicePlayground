@@ -11,22 +11,7 @@ public typealias JSONArray = [AnyObject]
 
 
 protocol Request{
-    func serializeToJSON() -> NSData
-}
-
-struct CartRequest: Request {
-    var cartId: String
-    
-    init(cartId: String ) {
-        self.cartId = cartId
-    }
-
-    func serializeToJSON() -> NSData {
-        let dict = ["id": self.cartId]
-        
-        //should be ok to try! here, we are asserting that this class can create valid JSON
-        return try! NSJSONSerialization.dataWithJSONObject(dict, options: [])
-    }
+    func serializeToJSON() -> JSON
 }
 
 protocol Response {
@@ -136,13 +121,11 @@ extension CartServiceEndpoint : ServiceRoute {
     }
 }
 
-
-
-
 class CartService: Service{
     
     func fetchCart(cartId: String, completion: Result<Cart> -> ()){
         
+        //TODO: should probably refactor to get rid of boilerplate code creating request
         let request = NSMutableURLRequest(URL: CartServiceEndpoint.Cart(cartId).url())
         request.HTTPMethod = "GET"
         request.addValue("text/json", forHTTPHeaderField: "Content-Type")
